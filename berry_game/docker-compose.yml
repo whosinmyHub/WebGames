@@ -1,0 +1,42 @@
+services:
+
+  db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: math_questions
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d math_questions"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "5332:5432" 
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # node-app:
+  #   container_name: backend
+  #   image: node:18-alpine
+  #   working_dir: /backend
+  #   volumes:
+  #     - ./backend:/backend
+  #   command: npm start
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - app-network
+  #   # This ensures Postgres starts first and is healthy before Node starts
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+networks:
+  app-network:
+    driver: bridge
